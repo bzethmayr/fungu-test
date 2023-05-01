@@ -28,8 +28,6 @@ publishing {
                 name = rootProject.name
                 description = rootProject.description
                 url = "https://github.com/${devId}/${rootProject.name}"
-                properties = [
-                ]
                 licenses {
                     license {
                         name = 'The 2-Clause BSD License'
