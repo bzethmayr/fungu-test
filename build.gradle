@@ -4,7 +4,7 @@ plugins {
 }
 
 group 'net.zethmayr.fungu'
-version '1.0.2-SNAPSHOT'
+version '1.0.3-SNAPSHOT'
 
 static boolean isLocal(final String version) {
     return version.endsWith('SNAPSHOT')
@@ -18,7 +18,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.hamcrest:hamcrest:2.2'
+    api 'org.hamcrest:hamcrest:2.2'
 }
 
 final String incFmt1 = "gradle/%s.gradle"
