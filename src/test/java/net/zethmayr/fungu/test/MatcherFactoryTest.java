@@ -8,12 +8,23 @@ import org.junit.jupiter.api.Test;
 import static net.zethmayr.fungu.test.MatcherFactory.has;
 import static net.zethmayr.fungu.test.MatcherFactory.hasNull;
 import static net.zethmayr.fungu.test.TestConstants.*;
+import static net.zethmayr.fungu.test.TestHelper.invokeDefaultConstructor;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class MatcherFactoryTest {
+
+    private static final String EXPECTED_UNEXPECTED_JOINER = " result was ";
+    private static final String WAS_NULL = "was null";
+
+    @Test
+    void matcherFactory_whenInstantiated_throwsInstead() {
+        assertThrows(UnsupportedOperationException.class, () ->
+
+                invokeDefaultConstructor(MatcherFactory.class));
+    }
+
     @Test
     void has_givenAccessAndMatcher_givenNull_doesNotMatchAndDescribesAsNull() {
         final Matcher<Object> hashesZero = has(Object::hashCode, equalTo(0));
@@ -23,7 +34,7 @@ class MatcherFactoryTest {
         assertThat(testValue, not(hashesZero));
         final Description mismatch = new StringDescription();
         hashesZero.describeMismatch(testValue, mismatch);
-        assertThat(mismatch.toString(), containsString("was null"));
+        assertThat(mismatch.toString(), containsString(WAS_NULL));
     }
 
     @Test
@@ -37,7 +48,7 @@ class MatcherFactoryTest {
         hashesZero.describeMismatch(testValue, mismatch);
         assertThat(mismatch.toString(), allOf(
                 containsString(EXPECTED),
-                containsString(" result was <")
+                containsString(EXPECTED_UNEXPECTED_JOINER)
         ));
     }
 
@@ -62,22 +73,20 @@ class MatcherFactoryTest {
         assertThat(testValue, not(notEmpty));
         final Description mismatch = new StringDescription();
         notEmpty.describeMismatch(testValue, mismatch);
-        assertThat(mismatch.toString(), containsString("was null"));
+        assertThat(mismatch.toString(), containsString(WAS_NULL));
     }
 
     @Test
     void has_givenAccessAndValue_givenNotMatching_doesNotMatchAndDescribesMismatch() {
-        final Matcher<String> veryLong = has(String::length, greaterThan(512));
+        final Matcher<String> hardToGuess = has(String::toString, SHIBBOLETH);
         final String testValue = EXPECTED;
 
-        assertFalse(veryLong.matches(testValue));
-        assertThat(testValue, not(veryLong));
+        assertFalse(hardToGuess.matches(testValue));
+        assertThat(testValue, not(hardToGuess));
         final Description mismatch = new StringDescription();
-        veryLong.describeMismatch(testValue, mismatch);
-        assertThat(mismatch.toString(), allOf(
-                containsString(testValue),
-                containsString(" result <8>"),
-                containsString("<512>")
+        hardToGuess.describeMismatch(testValue, mismatch);
+        assertThat(mismatch.toString(), stringContainsInOrder(
+                testValue, EXPECTED_UNEXPECTED_JOINER, testValue
         ));
     }
 
@@ -91,9 +100,7 @@ class MatcherFactoryTest {
         final Description mismatch = new StringDescription();
         isNotThatString.describeMismatch(testValue, mismatch);
         assertThat(mismatch.toString(), stringContainsInOrder(
-                testValue,
-                "result was",
-                testValue
+                testValue, EXPECTED_UNEXPECTED_JOINER, testValue
         ));
     }
 
