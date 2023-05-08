@@ -1,10 +1,8 @@
 package net.zethmayr.fungu.test;
 
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import static java.lang.String.format;
-import static java.util.Objects.nonNull;
 
 class TestExceptionFactory {
 
@@ -12,8 +10,7 @@ class TestExceptionFactory {
         throw becauseFactory();
     }
 
-    private static final String NOT_INSTANTIABLE_F = "This test class%scannot be instantiated.";
-    private static final String AND_F = " %s and ";
+    private static final String NOT_INSTANTIABLE_F = "This test class %s and cannot be instantiated.";
 
     static final String CONSTANTS_ONLY = notInstantiableAndReason("only defines constants");
 
@@ -22,10 +19,8 @@ class TestExceptionFactory {
     static final String STATICS_ONLY = notInstantiableAndReason("has only static members");
 
     @NotNull
-    private static String notInstantiableAndReason(@Nullable final String specificReason) {
-        return nonNull(specificReason)
-                ? format(format(NOT_INSTANTIABLE_F, AND_F), specificReason)
-                : format(NOT_INSTANTIABLE_F, " ");
+    private static String notInstantiableAndReason(@NotNull final String specificReason) {
+        return format(NOT_INSTANTIABLE_F, specificReason);
     }
 
     static UnsupportedOperationException becauseUnsupported(@NotNull final String reason) {
