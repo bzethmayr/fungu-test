@@ -1,5 +1,10 @@
 final String devId = 'bzethmayr'
 
+java {
+    withSourcesJar()
+    withJavadocJar()
+}
+
 publishing {
     repositories {
         if (isLocal(version)) {
