@@ -6,7 +6,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
-import static java.lang.String.format;
 import static net.zethmayr.fungu.test.TestConstants.TEST_RANDOM;
 import static net.zethmayr.fungu.test.TestExceptionFactory.becauseIllegal;
 import static net.zethmayr.fungu.test.TestExceptionFactory.becauseStaticsOnly;
@@ -29,9 +28,7 @@ public final class TestHelper {
      * @return any instance created
      * @throws Exception as thrown in instantiation
      */
-    public static <T> T invokeDefaultConstructor(
-            final Class<T> underTest
-    ) throws Exception {
+    public static <T> T invokeDefaultConstructor(final Class<T> underTest) throws Exception {
         final Constructor<T> defaultConstructor = underTest.getDeclaredConstructor();
         defaultConstructor.setAccessible(true);
         try {
@@ -41,10 +38,18 @@ public final class TestHelper {
         }
     }
 
+    /**
+     * Returns the first and only codepoint in the string, or throws.
+     *
+     * @param bound     a bounding string expected to contain one codepoint.
+     * @param boundName what sort of bound this is.
+     * @return the first and only codepoint
+     * @throws IllegalArgumentException if the string does not represent a codepoint.
+     */
     private static int checkedBound(@NotNull final String bound, final String boundName) {
         return Optional.of(bound)
                 .filter(s -> s.length() == 1)
-                .map(String::chars)
+                .map(String::codePoints)
                 .orElseThrow(() -> becauseIllegal("'%s' is not a valid %s bound", bound, boundName))
                 .findFirst()
                 .orElseThrow(IllegalStateException::new); // unreachable
@@ -53,9 +58,10 @@ public final class TestHelper {
     /**
      * Returns a random string with the given length in codepoints,
      * containing characters within the given bounds.
+     *
      * @param length the required length
-     * @param lower the minimum single character string.
-     * @param upper the maximum single character string.
+     * @param lower  the minimum single character string.
+     * @param upper  the maximum single character string.
      * @return a random string.
      */
     public static String randomString(final int length, final String lower, final String upper) {
@@ -88,8 +94,7 @@ public final class TestHelper {
         TEST_RANDOM.ints(lower, upper + 1)
                 .sequential()
                 .limit(length)
-                .mapToObj(Character::toChars)
-                .forEach(buffer::append);
+                .forEach(buffer::appendCodePoint);
         return buffer.toString();
     }
 
