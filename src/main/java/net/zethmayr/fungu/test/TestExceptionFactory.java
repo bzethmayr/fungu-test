@@ -40,4 +40,7 @@ class TestExceptionFactory {
         return becauseUnsupported(STATICS_ONLY);
     }
 
+    static IllegalArgumentException becauseIllegal(final String messageFormat, final Object... details) {
+        return new IllegalArgumentException(format(messageFormat, details));
+    }
 }
