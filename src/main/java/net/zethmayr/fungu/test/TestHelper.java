@@ -5,7 +5,14 @@ import org.jetbrains.annotations.NotNull;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.TimeUnit;
 
+import static java.lang.Integer.min;
+import static java.lang.Thread.currentThread;
+import static java.util.concurrent.Executors.newFixedThreadPool;
+import static java.util.concurrent.TimeUnit.MINUTES;
+import static java.util.stream.IntStream.range;
 import static net.zethmayr.fungu.test.TestConstants.TEST_RANDOM;
 import static net.zethmayr.fungu.test.TestExceptionFactory.becauseIllegal;
 import static net.zethmayr.fungu.test.TestExceptionFactory.becauseStaticsOnly;
@@ -107,5 +114,58 @@ public final class TestHelper {
      */
     public static String randomString(final int length) {
         return randomString(length, 32, Character.MAX_VALUE);
+    }
+
+    /**
+     * Runs the given tests
+     * using as many threads as tests,
+     * with a timeout of three minutes.
+     *
+     * @param tests some tests.
+     * @return false if the timeout was exceeded, otherwise true.
+     */
+    public static boolean concurrently(final Runnable... tests) {
+        return concurrently(tests.length, tests);
+    }
+
+    /**
+     * Runs the given tests
+     * on up to the given maximum number of threads,
+     * with a timeout of three minutes.
+     *
+     * @param max   the maximum thread count.
+     * @param tests some tests.
+     * @return false if the timeout was exceeded, otherwise true.
+     */
+    public static boolean concurrently(final int max, final Runnable... tests) {
+        return concurrently(max, 3L, MINUTES, tests);
+    }
+
+    /**
+     * Runs the given tests
+     * on up to the given maximum number of threads,
+     * with the given timeout.
+     *
+     * @param max    the maximum thread count.
+     * @param length the length of the timeout.
+     * @param units  the units of the timeout.
+     * @param tests  some tests.
+     * @return false if the timeout was exceeded, otherwise true.
+     */
+    public static boolean concurrently(final int max, final long length, final TimeUnit units, final Runnable... tests) {
+        final int realMax = min(max, tests.length);
+        final ExecutorService runner = newFixedThreadPool(realMax);
+        range(0, realMax).forEach(x -> runner.submit(() -> {
+        }));
+        for (Runnable each : tests) {
+            runner.submit(each);
+        }
+        runner.shutdown();
+        try {
+            return runner.awaitTermination(length, units);
+        } catch (final InterruptedException thrown) {
+            currentThread().interrupt();
+        }
+        return false;
     }
 }
