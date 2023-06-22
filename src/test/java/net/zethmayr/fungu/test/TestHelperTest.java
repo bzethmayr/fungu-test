@@ -1,15 +1,14 @@
 package net.zethmayr.fungu.test;
 
-import org.hamcrest.Matchers;
 import org.junit.jupiter.api.Test;
 
+import static java.lang.Thread.currentThread;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 import static net.zethmayr.fungu.test.TestConstants.TEST_RANDOM;
-import static net.zethmayr.fungu.test.TestHelper.invokeDefaultConstructor;
-import static net.zethmayr.fungu.test.TestHelper.randomString;
+import static net.zethmayr.fungu.test.TestHelper.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TestHelperTest {
 
@@ -94,5 +93,55 @@ class TestHelperTest {
         final String result = randomString(expectedLength);
 
         assertThat(result, hasLength(expectedLength));
+    }
+
+    @Test
+    void concurrently_givenCompletingTests_returnsTrue() {
+
+        assertTrue(concurrently(() -> {
+        }));
+    }
+
+    @Test
+    void concurrently_givenInvalidMax_throwsPerImplementation() {
+
+        assertThrows(IllegalArgumentException.class, () ->
+
+                concurrently(0, () -> {
+                }));
+    }
+
+    @Test
+    void concurrently_givenNoTasks_throwsPerImplementation() {
+
+        assertThrows(IllegalArgumentException.class,
+
+                TestHelper::concurrently);
+    }
+
+    @Test
+    void concurrently_whenTimeout_returnsFalse() {
+        assertFalse(() ->
+                concurrently(1, 10, NANOSECONDS, () -> {
+
+                    try {
+                        Thread.sleep(1, 1);
+                    } catch (final InterruptedException thrown) {
+                        currentThread().interrupt();
+                    }
+                }));
+    }
+
+    @Test
+    void concurrently_whenTimeoutIgnoresInterrupts_returnsFalse() {
+        assertFalse(() ->
+                concurrently(1, 10, NANOSECONDS, () -> {
+
+                    try {
+                        Thread.sleep(1, 1);
+                    } catch (final InterruptedException thrown) {
+                        assertNotNull(thrown);
+                    }
+                }));
     }
 }
